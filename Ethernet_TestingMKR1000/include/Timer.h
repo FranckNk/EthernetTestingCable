@@ -25,4 +25,20 @@ class Timer
 
         bool isTimerReady();
 };
+
+class LedFromColor
+{
+    private:
+        short int BrocheColor;
+        short int LedPIN;
+
+    public:
+        LedFromColor(){}
+
+        void Initialisation();
+
+        void Configure(short int PIN, short int Broche);
+
+        short int GetPINLed();
+};
 #endif
