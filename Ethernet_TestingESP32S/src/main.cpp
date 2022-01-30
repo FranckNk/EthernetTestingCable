@@ -43,7 +43,16 @@ LedFromColor GreenLEDs[4];
 
 // Déclaration des variables.
 // Variables will change:
-short int ledState = LOW;         // the current state of the output pin
+bool FinalStatus = false;
+bool CheckingStatus = true;
+bool Finished = false;
+short int ComptChecking = 0;
+short int LastLED = 5;
+
+short int StateResult[4] = {0};
+short int ledState = LOW;         // L'état de cette variable va nous permettre de 
+									// connaitre le mode de fonctionnement.
+									// LOW = Mode DROIT ; HIGH = Mode CROISE
 short int buttonState;             // the current reading from the input pin
 short int lastButtonState = HIGH;   // the previous reading from the input pin
 unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
@@ -53,27 +62,28 @@ short int PinSwitchMode 	= 19;
 short int IdLED = 0;
 unsigned long TimeDelay 	= 500;
 unsigned long TimeDelayPrint 	= 2000;
-unsigned long TimeDelayTemp = 0;
 
 void SelectLED(short int NumLED);
 short int GetSignalPin();
 void TurnOffLEDs();
+void TurnOnLEDs();
+bool CableDecisionDroit();
+bool CableDecisionCrosie();
+void ResetResults();
 
 void setup() {
 
 	Serial.begin(9600);
 	// Configuration des LED des couleurs identificatives
-	GreenLEDs[0].Configure(PIN_GREEN_LED1, PIN_GREEN_WHITE);
-	GreenLEDs[1].Configure(PIN_GREEN_LED2, PIN_GREEN);
-	GreenLEDs[2].Configure(PIN_GREEN_LED3, PIN_ORANGE_WHITE);
-	GreenLEDs[3].Configure(PIN_GREEN_LED4, PIN_ORANGE);
+	GreenLEDs[0].Configure(PIN_GREEN_LED1, PIN_MARRON);
+	GreenLEDs[1].Configure(PIN_GREEN_LED2, PIN_MARRON_WHITE);
+	GreenLEDs[2].Configure(PIN_GREEN_LED3, PIN_ORANGE);
+	GreenLEDs[3].Configure(PIN_GREEN_LED4, PIN_ORANGE_WHITE);
 
 	//Configuration des sorties des LEDs.
 	for (int i = 0; i < 4; i++)
 		GreenLEDs[i].Initialisation();
 	
-
-
 	// Configuration des sorties des broches du RJ45 Femalle.
 	pinMode(PIN_BLUE, INPUT);
 	pinMode(PIN_GREEN, INPUT);
@@ -86,14 +96,30 @@ void setup() {
 
 	// Configuration de la broche de décision.
 	pinMode(PinSwitchMode, INPUT);
+
+	TempPrint.startTimer(3000);
 	
 	  /**
      *  @brief initialize the LCD and master IIC
      */ 
     lcd.init();
-    // Print a message to the LCD.
-    lcd.print("Hi :) ESP32");
-	lcd.setRGB(255,204,255);
+    // Print a first message to the LCD.
+    if (ledState){
+		lcd.clear();
+		lcd.setRGB(0, 0, 200);
+		lcd.setCursor(0,0);
+		lcd.print("Mode: DROIT");
+		lcd.setCursor(0,1);
+		lcd.print("Checking Cable..");
+	}
+	else{
+		lcd.clear();
+		lcd.setRGB(255, 255, 0);
+		lcd.setCursor(0,0);
+		lcd.print("Mode: CROISE");
+		lcd.setCursor(0,1);
+		lcd.print("Checking Cable..");
+	}
 }
 
 void loop() {
@@ -117,21 +143,48 @@ void loop() {
 
 		// if the button state has changed:
 		if (reading != buttonState) {
-				buttonState = reading;
+			buttonState = reading;
 
-				// only toggle the LED if the new button state is HIGH
-				if (buttonState == HIGH) {
-					ledState = !ledState;
-					IdLED = 0;
-					Temp.startTimer(TimeDelay);  // Temps pour allumer les LED.
-					TempPrint.startTimer(TimeDelayPrint);// Temps d'attente pour afficher
-										// au moniteur série.
+			// only toggle the LED if the new button state is HIGH
+			if (buttonState == HIGH) {
+				ledState = !ledState; // On change de mode de fonctionnement.
+				// On reset toutes les variables pour le statut du mode.
+				Reset:
+				ComptChecking = 0;
+				ResetResults();
+				CheckingStatus = true;
+				FinalStatus = false;
+				Finished = false;
+				LastLED = 5;
+				IdLED = 0;
+				// Affichage du mode dans l'écran LCD
+				if (ledState){
+					lcd.clear();
+					lcd.setRGB(0, 0, 200);
+					lcd.setCursor(0,0);
+					lcd.print("Mode: DROIT");
+					lcd.setCursor(0,1);
+					lcd.print("Checking Cable..");
 				}
+				else{
+					lcd.clear();
+					lcd.setRGB(255, 255, 0);
+					lcd.setCursor(0,0);
+					lcd.print("Mode: CROISE");
+					lcd.setCursor(0,1);
+					lcd.print("Checking Cable..");
+				}
+				Temp.startTimer(TimeDelay);  // Temps pour allumer les LED.
+				// TempPrint.startTimer(TimeDelayPrint);// Temps d'attente pour afficher
+									// au moniteur série ou a l'écran LCD.
 			}
 		}
+	}
 
-	if (ledState){
+	if (ledState && CheckingStatus){
 		// set the LED:
+		// Nous sommes au mode DROIT.
+
 		IdLED = GetSignalPin();
 		if (IdLED != 20){
 			SelectLED(IdLED);	
@@ -140,48 +193,44 @@ void loop() {
 		else
 			TurnOffLEDs();
 		
-		if (TempPrint.isTimerReady()){
-
-			Serial.println("\n\nL'état est : Actif...\n");
-		/*
-			short int Value = analogRead(PIN_GREEN);
-			Serial.print("Broche Vert         : ");
-			Serial.println(Value);
-			Value = analogRead(PIN_GREEN_WHITE);
-			Serial.print("Broche Vert-Blanc   : ");
-			Serial.println(Value);
-			Value = analogRead(PIN_ORANGE);
-			Serial.print("Broche Orange       : ");
-			Serial.println(Value);
-			Value = analogRead(PIN_ORANGE_WHITE);
-			Serial.print("Broche Orange-Blanc : ");
-			Serial.println(Value);
-			Value = analogRead(PIN_BLUE);
-			Serial.print("Broche Bleue        : ");
-			Serial.println(Value);
-			Value = analogRead(PIN_BLUE_WHITE);
-			Serial.print("Broche Bleu-Blanc   : ");
-			Serial.println(Value);
-			Value = analogRead(PIN_MARRON);
-			Serial.print("Broche Marron       : ");
-			Serial.println(Value);
-			Value = analogRead(PIN_MARRON_WHITE);
-			Serial.print("Broche Marron-Blanc : ");
-			Serial.println(Value);
-		*/
-			TempPrint.startTimer(TimeDelayPrint);
+	}
+	else if (!ledState && CheckingStatus){
+		// Nous sommes au Mode CROISE.
+		
+		IdLED = GetSignalPin();
+		if (IdLED != 20){
+			SelectLED(IdLED);	
+			// Temp.startTimer(TimeDelay);
 		}
+		else{
+			TurnOffLEDs();
+		}
+		
 	}
 	else{
-		if (TempPrint.isTimerReady()){
-			Serial.println("\nL'état est : Inactif...\n");
-			TempPrint.startTimer(TimeDelayPrint);
+		// La vérification est terminée... On affiche un message dans le LCD.
+		// On fait maintenant clignoter l'écran LCD, changer la couleur
+		if (FinalStatus == true && GetSignalPin() != 20){
+			if (millis() % 1000 > 500) {
+                lcd.setRGB(0, 0, 200);
+				TurnOnLEDs();
+            } else {
+                lcd.setRGB(200, 200, 0);
+				TurnOffLEDs();
+            }
 		}
-		digitalWrite(PIN_GREEN_LED1, 0);
-		digitalWrite(PIN_GREEN_LED2, 0);
-		digitalWrite(PIN_GREEN_LED3, 0);
-		digitalWrite(PIN_GREEN_LED4, 0);
+		else if (FinalStatus == false && GetSignalPin() != 20)
+		{
+			TurnOffLEDs();
+			if (millis() % 500 > 250) {
+                lcd.setRGB(200, 0, 0);
+            } else {
+                lcd.setRGB(200, 200, 200);
+            }
+		}
 	}
+
+
 	// save the reading. Next time through the loop, it'll be the lastButtonState:
 	lastButtonState = reading;
 }
@@ -190,6 +239,7 @@ short int GetSignalPin(){
 	for (short i = 0; i < 4; i++)
 	{
 		if (analogRead(GreenLEDs[i].GetPINLed()) == 4095){
+			
 			return i;
 		}
 	}
@@ -197,14 +247,64 @@ short int GetSignalPin(){
 	
 }
 
-void TurnOffLEDs(){
-	digitalWrite(PIN_GREEN_LED1, 0);
-	digitalWrite(PIN_GREEN_LED2, 0);
-	digitalWrite(PIN_GREEN_LED3, 0);
-	digitalWrite(PIN_GREEN_LED4, 0);
+void ResetResults(){
+	for (int i = 0; i < 4; i++)
+	{
+		StateResult[i] = 5;
+	}
+	
+}
+
+bool CableDecisionDroit(){
+	if (StateResult[0] == PIN_MARRON && StateResult[1] == PIN_MARRON_WHITE && StateResult[2] == PIN_ORANGE && StateResult[3] == PIN_ORANGE_WHITE )
+	{
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print("Mode: DROIT");
+		lcd.setCursor(0,1);
+		lcd.print("Good Cable");
+		return true;
+	}
+	else{
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print("Mauvais Cable :(");
+		lcd.setCursor(0,1);
+		lcd.print("Check MODE...");
+		return false;
+	}
+}
+
+bool CableDecisionCroise(){
+	if (StateResult[0] == PIN_ORANGE && StateResult[1] == PIN_ORANGE_WHITE && StateResult[2] == PIN_MARRON && StateResult[3] == PIN_MARRON_WHITE )
+	{
+		lcd.clear();
+		lcd.setCursor(0,0);
+		lcd.print("Mode: CROISE");
+		lcd.setCursor(0,1);
+		lcd.print("Good Cable");
+		return true;
+	}
+	lcd.clear();
+	lcd.setCursor(0,0);
+	lcd.print("Mauvais Cable :(");
+	lcd.setCursor(0,1);
+	lcd.print("Check MODE...");
+	return false;
 }
 
 void SelectLED(short int NumLED){
+	
+	if (CheckingStatus == true && NumLED != LastLED && ComptChecking < 4){
+		LastLED = NumLED;
+		StateResult[ComptChecking] = GreenLEDs[NumLED].GetPINLed();
+		ComptChecking += 1;
+	}else if (ComptChecking == 4){
+		CheckingStatus = false;
+		Finished = true;
+		FinalStatus = ledState? CableDecisionDroit():CableDecisionCroise();
+	}
+	
 	switch (NumLED)
 	{
 	case 0:
@@ -235,4 +335,18 @@ void SelectLED(short int NumLED){
 	default:
 		break;
 	}
+}
+
+void TurnOffLEDs(){
+	digitalWrite(PIN_GREEN_LED1, 0);
+	digitalWrite(PIN_GREEN_LED2, 0);
+	digitalWrite(PIN_GREEN_LED3, 0);
+	digitalWrite(PIN_GREEN_LED4, 0);
+}
+
+void TurnOnLEDs(){
+	digitalWrite(PIN_GREEN_LED1, 1);
+	digitalWrite(PIN_GREEN_LED2, 1);
+	digitalWrite(PIN_GREEN_LED3, 1);
+	digitalWrite(PIN_GREEN_LED4, 1);
 }

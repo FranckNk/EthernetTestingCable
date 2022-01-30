@@ -25,6 +25,8 @@ const short int PIN_GREEN_LED1 = A1;
 const short int PIN_GREEN_LED2 = A2;
 const short int PIN_GREEN_LED3 = A3;
 const short int PIN_GREEN_LED4 = A4;
+const short int PIN_MODE_DROIT = 9;
+const short int PIN_MODE_CROISE = 10;
 
 // Les Pin pour le RJ45 Femelle.
 const short int PIN_BLUE     	 = 4;
@@ -58,15 +60,16 @@ void SelectLED(short int NumLED);
 void ActiveCableEthernet(short int PinBroche);
 void DesactiveCableEthernet();
 void SendSignal(short int ExceptPin);
+void LEDModeON();
 
 void setup() {
 
 	Serial.begin(9600);
 	// Configuration des LED des couleurs identificatives
-	GreenLEDs[0].Configure(PIN_GREEN_LED1, PIN_GREEN_WHITE);
-	GreenLEDs[1].Configure(PIN_GREEN_LED2, PIN_GREEN);
-	GreenLEDs[2].Configure(PIN_GREEN_LED3, PIN_ORANGE_WHITE);
-	GreenLEDs[3].Configure(PIN_GREEN_LED4, PIN_ORANGE);
+	GreenLEDs[0].Configure(PIN_GREEN_LED1, PIN_MARRON);
+	GreenLEDs[1].Configure(PIN_GREEN_LED2, PIN_MARRON_WHITE);
+	GreenLEDs[2].Configure(PIN_GREEN_LED3, PIN_ORANGE);
+	GreenLEDs[3].Configure(PIN_GREEN_LED4, PIN_ORANGE_WHITE);
 
 	//Configuration des sorties des LEDs.
 	for (int i = 0; i < 4; i++)
@@ -127,7 +130,7 @@ void loop() {
 		// C'est à ce niveau que doit se faire les opération sur le Test du cable Ethernet.
 		// Car toutes les condition sont réunies.
 		// set the LED: 
-		// ActiveCableEthernet();
+		LEDModeON();
 		SelectLED(IdLED); // On allume la LED correspondante.
 		SendSignal(IdLED);
 		if (Temp.isTimerReady()){
@@ -139,11 +142,16 @@ void loop() {
 		}
 	}
 	else{
-		DesactiveCableEthernet();
-		digitalWrite(PIN_GREEN_LED1, 0);
-		digitalWrite(PIN_GREEN_LED2, 0);
-		digitalWrite(PIN_GREEN_LED3, 0);
-		digitalWrite(PIN_GREEN_LED4, 0);
+		LEDModeON();
+		SelectLED(IdLED); // On allume la LED correspondante.
+		SendSignal(IdLED);
+		if (Temp.isTimerReady()){
+			if (IdLED == 3)
+				IdLED = 0;
+			else
+				IdLED += 1;			
+			Temp.startTimer(TimeDelayLED);
+		}
 	}
 	
 
@@ -153,8 +161,15 @@ void loop() {
 
 
 
-void ActiveCableEthernet(short int PinBroche){
-	digitalWrite(PinBroche, HIGH);
+void LEDModeON(){
+	if (ledState){
+		analogWrite(PIN_MODE_DROIT, 255);
+		analogWrite(PIN_MODE_CROISE, 0);
+	}
+	else{
+		analogWrite(PIN_MODE_DROIT, 0);
+		analogWrite(PIN_MODE_CROISE, 255);
+	}
 }
 
 void DesactiveCableEthernet(){
