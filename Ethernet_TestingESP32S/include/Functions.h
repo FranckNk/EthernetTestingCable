@@ -13,36 +13,14 @@ private:
     unsigned char ValCableCroise = ((unsigned char) 0x97);
     unsigned char ValCableCroiseInverse = ((unsigned char) 0x6E);
 public:
-    RJ45_Femalle();
+    RJ45_Female();
 
     //Initialisation des broches.
-    void InitialisationRJ45F(){
-        for (int i = 0; i < sizeof(PinCables)/sizeof(short int); i++)
-        {
-            pinMode(PinCables[i], INPUT);
-        }
-        
-    }
+    void InitialisationRJ45F();
 
-    void SetPinsRJ45(short int PINS[]){
-        for (int i = 0; i < 8; i++)
-        {
-           PinCables[i] = PINS[i];
-        }
-    }
+    void SetPinsRJ45(short int PINS[]);
 
-    bool GetSignal(){
-        for (int i = 0; i < 8; i++)
-        {
-            if (analogRead(PinCables[i]) == 4095)
-                SignalGot[i] = 1;
-            else if (analogRead(PinCables[i]) == 0)
-                SignalGot[i] = 0;
-            else
-                return false;
-        }
-        return true;
-    }
+    bool GetSignal();
 };
 
  

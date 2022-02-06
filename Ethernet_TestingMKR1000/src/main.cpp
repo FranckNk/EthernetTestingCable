@@ -37,8 +37,6 @@ const short int PIN_GREEN_WHITE  = 3;
 const short int PIN_ORANGE_WHITE = 1;
 const short int PIN_MARRON_WHITE = 7;
 
-// Déclaration des LED des couleurs identificatives.
-LedFromColor GreenLEDs[4];
 
 // Déclaration des variables.
 // Variables will change:
@@ -55,25 +53,13 @@ unsigned long TimeDelayPrint = 2000;
 unsigned long TimeDelayTemp  = 0;
 
 // Declaration des fonctions.
-void SelectLED(short int NumLED);
 void ActiveCableEthernet(short int PinBroche);
 void DesactiveCableEthernet();
-void SendSignal(short int ExceptPin);
 void LEDModeON();
 
 void setup() {
 
 	Serial.begin(9600);
-	// Configuration des LED des couleurs identificatives
-	GreenLEDs[0].Configure(PIN_GREEN_LED1, PIN_MARRON);
-	GreenLEDs[1].Configure(PIN_GREEN_LED2, PIN_MARRON_WHITE);
-	GreenLEDs[2].Configure(PIN_GREEN_LED3, PIN_ORANGE);
-	GreenLEDs[3].Configure(PIN_GREEN_LED4, PIN_ORANGE_WHITE);
-
-	//Configuration des sorties des LEDs.
-	for (int i = 0; i < 4; i++)
-		GreenLEDs[i].Initialisation();
-	
 
 	// Configuration des sorties des broches du RJ45 Femalle.
 	pinMode(PIN_BLUE, INPUT);
@@ -119,40 +105,11 @@ void loop() {
 			// only toggle the LED if the new button state is HIGH
 			if (buttonState == HIGH) {
 				ledState = !ledState;
-				IdLED = 0;
+				LEDModeON(); // On change de mode sur la LED.
 				Temp.startTimer(TimeDelayLED);
 			}
 		}
 	}
-
-	if (ledState){
-		// C'est à ce niveau que doit se faire les opération sur le Test du cable Ethernet.
-		// Car toutes les condition sont réunies.
-		// set the LED: 
-		LEDModeON();
-		SelectLED(IdLED); // On allume la LED correspondante.
-		SendSignal(IdLED);
-		if (Temp.isTimerReady()){
-			if (IdLED == 3)
-				IdLED = 0;
-			else
-				IdLED += 1;			
-			Temp.startTimer(TimeDelayLED);
-		}
-	}
-	else{
-		LEDModeON();
-		SelectLED(IdLED); // On allume la LED correspondante.
-		SendSignal(IdLED);
-		if (Temp.isTimerReady()){
-			if (IdLED == 3)
-				IdLED = 0;
-			else
-				IdLED += 1;			
-			Temp.startTimer(TimeDelayLED);
-		}
-	}
-	
 
 	// save the reading. Next time through the loop, it'll be the lastButtonState:
 	lastButtonState = reading;
@@ -182,47 +139,4 @@ void DesactiveCableEthernet(){
 	analogWrite(PIN_MARRON_WHITE, 0);
 }
 
-void SendSignal(short int ExceptPin){
-	for (int i = 0; i < 4; i++)
-	{
-		if (i != ExceptPin)
-			analogWrite(GreenLEDs[i].GetPINLed(), 0);
-		else
-			analogWrite(GreenLEDs[i].GetPINLed(), 255);	
-	}
-	
-}
-
-void SelectLED(short int NumLED){
-	switch (NumLED)
-	{
-	case 0:
-		digitalWrite(PIN_GREEN_LED1, 1);
-		digitalWrite(PIN_GREEN_LED2, 0);
-		digitalWrite(PIN_GREEN_LED3, 0);
-		digitalWrite(PIN_GREEN_LED4, 0);
-		break;
-	case 1:
-		digitalWrite(PIN_GREEN_LED1, 0);
-		digitalWrite(PIN_GREEN_LED2, 1);
-		digitalWrite(PIN_GREEN_LED3, 0);
-		digitalWrite(PIN_GREEN_LED4, 0);
-		break;
-	case 2:
-		digitalWrite(PIN_GREEN_LED1, 0);
-		digitalWrite(PIN_GREEN_LED2, 0);
-		digitalWrite(PIN_GREEN_LED3, 1);
-		digitalWrite(PIN_GREEN_LED4, 0);
-		break;
-	
-	case 3:
-		digitalWrite(PIN_GREEN_LED1, 0);
-		digitalWrite(PIN_GREEN_LED2, 0);
-		digitalWrite(PIN_GREEN_LED3, 0);
-		digitalWrite(PIN_GREEN_LED4, 1);
-		break;
-	default:
-		break;
-	}
-}
 

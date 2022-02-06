@@ -23,7 +23,11 @@ DFRobot_RGBLCD1602 lcd(/*lcdCols*/16,/*lcdRows*/2);  //16 characters and 2 lines
 // Declaration d'une instance de la classe Timer.
 Timer Temp;
 Timer TempPrint;
+RJ45_Female MaTeteFemelle;
 
+// Declaration du tableau de toutes les pins du RJ45_Female
+short int PinsValues[8] = {PIN_ORANGE_WHITE, PIN_ORANGE, PIN_GREEN_WHITE, PIN_BLUE, 
+							PIN_BLUE_WHITE, PIN_GREEN, PIN_MARRON_WHITE, PIN_MARRON};
 // Déclaration des constantes.
 // Les LED des modes.
 const short int PIN_MODE_DROIT = 1;
@@ -43,10 +47,6 @@ const short int PIN_BLUE_WHITE 	 = 27;
 const short int PIN_GREEN_WHITE  = 25;
 const short int PIN_ORANGE_WHITE = 32;
 const short int PIN_MARRON_WHITE = 12;
-
-// Déclaration des LED des couleurs identificatives. 
-// LED ON lorsque le signal est envoyé.
-LedFromColor GreenLEDs[4];
 
 // Déclaration des variables.
 // Variables will change:
@@ -70,8 +70,6 @@ short int IdLED = 0;
 unsigned long TimeDelay 	= 500;
 unsigned long TimeDelayPrint 	= 2000;
 
-void SelectLED(short int NumLED);
-short int GetSignalPin();
 void TurnOffLEDs();
 void TurnOnLEDs();
 bool CableDecisionDroit();
@@ -81,16 +79,6 @@ void ResetResults();
 void setup() {
 
 	Serial.begin(9600);
-	// Configuration des LED des couleurs identificatives
-	GreenLEDs[0].Configure(PIN_GREEN_LED1, PIN_MARRON);
-	GreenLEDs[1].Configure(PIN_GREEN_LED2, PIN_MARRON_WHITE);
-	GreenLEDs[2].Configure(PIN_GREEN_LED3, PIN_ORANGE);
-	GreenLEDs[3].Configure(PIN_GREEN_LED4, PIN_ORANGE_WHITE);
-
-	//Configuration des sorties des LEDs.
-	for (int i = 0; i < 4; i++)
-		GreenLEDs[i].Initialisation();
-	
 	// Configuration des sorties des broches du RJ45 Femalle.
 	pinMode(PIN_BLUE, INPUT);
 	pinMode(PIN_GREEN, INPUT);
@@ -100,6 +88,9 @@ void setup() {
 	pinMode(PIN_GREEN_WHITE, INPUT);
 	pinMode(PIN_ORANGE_WHITE, INPUT);
 	pinMode(PIN_MARRON_WHITE, INPUT);
+
+	MaTeteFemelle.SetPinsRJ45(PinsValues);
+	MaTeteFemelle.InitialisationRJ45F();
 
 	// Configuration de la broche de décision.
 	pinMode(PinSwitchMode, INPUT);
@@ -133,6 +124,8 @@ void loop() {
 	// put your main code here, to run repeatedly:
 	
 	int reading = digitalRead(PinSwitchMode);
+	int ModeBlue = digitalRead(PIN_MODE_DROIT);
+	int ModeCroise = digitalRead(PIN_MODE_CROISE);
 
 	// check to see if you just pressed the button
 	// (i.e. the input went from LOW to HIGH), and you've waited long enough
@@ -244,20 +237,9 @@ void loop() {
 short int GetSignalPin(){
 	for (short i = 0; i < 4; i++)
 	{
-		if (analogRead(GreenLEDs[i].GetPINLed()) == 4095){
-			
-			return i;
-		}
+		
 	}
 	return 20;
-	
-}
-
-void ResetResults(){
-	for (int i = 0; i < 4; i++)
-	{
-		StateResult[i] = 5;
-	}
 	
 }
 
@@ -303,7 +285,7 @@ void SelectLED(short int NumLED){
 	
 	if (CheckingStatus == true && NumLED != LastLED && ComptChecking < 4){
 		LastLED = NumLED;
-		StateResult[ComptChecking] = GreenLEDs[NumLED].GetPINLed();
+		// StateResult[ComptChecking] = GreenLEDs[NumLED].GetPINLed();
 		ComptChecking += 1;
 	}else if (ComptChecking == 4){
 		CheckingStatus = false;
