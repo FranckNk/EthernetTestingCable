@@ -6,6 +6,7 @@ DATE           : 28/01/2022
 DESCRIPTION    : Programme pour tester deux cables RJ45, ce uC sera considéré comme éméteur du 
 				 signal.
 				 Inspiration du code BuitinExample de Arduino pour le rebondissement. Source : https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce
+				 Et aussi du code pour tester l'écran LCD.
 VERSION        : 0.0.1
 
 */
@@ -23,22 +24,27 @@ Timer Temp;
 Timer TempPrint;
 
 // Déclaration des constantes.
+// Les LED des modes.
+const short int PIN_MODE_DROIT = 1;
+const short int PIN_MODE_CROISE = 4;
+
 // Les LEDs.
-const short int PIN_GREEN_LED1 = 15;
-const short int PIN_GREEN_LED2 = 2;
-const short int PIN_GREEN_LED3 = 4;
+const short int PIN_GREEN_LED1 = 2;
+const short int PIN_GREEN_LED2 = 5;
+const short int PIN_GREEN_LED3 = 3;
 const short int PIN_GREEN_LED4 = 23;
 // Les Pin pour le RJ45 Femelle.
-const short int PIN_BLUE     	 = 27;
-const short int PIN_GREEN        = 12;
-const short int PIN_ORANGE  	 = 25;
-const short int PIN_MARRON  	 = 32;
-const short int PIN_BLUE_WHITE 	 = 26;
-const short int PIN_GREEN_WHITE  = 13;
-const short int PIN_ORANGE_WHITE = 14;
-const short int PIN_MARRON_WHITE = 33;
+const short int PIN_BLUE     	 = 26;
+const short int PIN_GREEN        = 14;
+const short int PIN_ORANGE  	 = 33;
+const short int PIN_MARRON  	 = 13;
+const short int PIN_BLUE_WHITE 	 = 27;
+const short int PIN_GREEN_WHITE  = 25;
+const short int PIN_ORANGE_WHITE = 32;
+const short int PIN_MARRON_WHITE = 12;
 
-// Déclaration des LED des couleurs identificatives.
+// Déclaration des LED des couleurs identificatives. 
+// LED ON lorsque le signal est envoyé.
 LedFromColor GreenLEDs[4];
 
 // Déclaration des variables.
@@ -149,7 +155,6 @@ void loop() {
 			if (buttonState == HIGH) {
 				ledState = !ledState; // On change de mode de fonctionnement.
 				// On reset toutes les variables pour le statut du mode.
-				Reset:
 				ComptChecking = 0;
 				ResetResults();
 				CheckingStatus = true;

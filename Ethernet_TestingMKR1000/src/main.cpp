@@ -30,12 +30,12 @@ const short int PIN_MODE_CROISE = 10;
 
 // Les Pin pour le RJ45 Femelle.
 const short int PIN_BLUE     	 = 4;
-const short int PIN_GREEN        = 2;
-const short int PIN_ORANGE  	 = 6;
+const short int PIN_GREEN        = 6;
+const short int PIN_ORANGE  	 = 2;
 const short int PIN_MARRON  	 = 8;
 const short int PIN_BLUE_WHITE 	 = 5;
-const short int PIN_GREEN_WHITE  = 1;
-const short int PIN_ORANGE_WHITE = 3;
+const short int PIN_GREEN_WHITE  = 3;
+const short int PIN_ORANGE_WHITE = 1;
 const short int PIN_MARRON_WHITE = 7;
 
 // Déclaration des LED des couleurs identificatives.
