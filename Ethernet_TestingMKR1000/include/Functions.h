@@ -20,11 +20,7 @@ public:
 
     void SetPinsRJ45(short int PINS[]);
 
-    bool GetSignal();
-
-    bool TestCable();
-
-    void GetValues(short int Tab[]);
+    void SendSignal();
 };
 
  

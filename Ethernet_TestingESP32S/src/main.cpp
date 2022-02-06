@@ -25,12 +25,9 @@ Timer Temp;
 Timer TempPrint;
 RJ45_Female MaTeteFemelle;
 
-// Declaration du tableau de toutes les pins du RJ45_Female
-short int PinsValues[8] = {PIN_ORANGE_WHITE, PIN_ORANGE, PIN_GREEN_WHITE, PIN_BLUE, 
-							PIN_BLUE_WHITE, PIN_GREEN, PIN_MARRON_WHITE, PIN_MARRON};
 // Déclaration des constantes.
 // Les LED des modes.
-const short int PIN_MODE_DROIT = 1;
+const short int PIN_MODE_DROIT = 18;
 const short int PIN_MODE_CROISE = 4;
 
 // Les LEDs.
@@ -48,6 +45,11 @@ const short int PIN_GREEN_WHITE  = 25;
 const short int PIN_ORANGE_WHITE = 32;
 const short int PIN_MARRON_WHITE = 12;
 
+// Declaration du tableau de toutes les pins du RJ45_Female
+short int PinsValues[8] = {PIN_ORANGE_WHITE, PIN_ORANGE, PIN_GREEN_WHITE, PIN_BLUE, 
+							PIN_BLUE_WHITE, PIN_GREEN, PIN_MARRON_WHITE, PIN_MARRON};
+short int GotValues[8] = {0};
+
 // Déclaration des variables.
 // Variables will change:
 bool FinalStatus = false;
@@ -55,19 +57,11 @@ bool CheckingStatus = true;
 bool Finished = false;
 short int ComptChecking = 0;
 short int LastLED = 5;
+short int ModeCroise;
+short int ModeBlue;
 
 short int StateResult[4] = {0};
-short int ledState = LOW;         // L'état de cette variable va nous permettre de 
-									// connaitre le mode de fonctionnement.
-									// LOW = Mode DROIT ; HIGH = Mode CROISE
-short int buttonState;             // the current reading from the input pin
-short int lastButtonState = HIGH;   // the previous reading from the input pin
-unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
-unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
-
-short int PinSwitchMode 	= 19;		
-short int IdLED = 0;
-unsigned long TimeDelay 	= 500;
+unsigned long TimeDelay 	= 3000;
 unsigned long TimeDelayPrint 	= 2000;
 
 void TurnOffLEDs();
@@ -79,137 +73,93 @@ void ResetResults();
 void setup() {
 
 	Serial.begin(9600);
-	// Configuration des sorties des broches du RJ45 Femalle.
-	pinMode(PIN_BLUE, INPUT);
-	pinMode(PIN_GREEN, INPUT);
-	pinMode(PIN_ORANGE, INPUT);
-	pinMode(PIN_MARRON, INPUT);
-	pinMode(PIN_BLUE_WHITE, INPUT);
-	pinMode(PIN_GREEN_WHITE, INPUT);
-	pinMode(PIN_ORANGE_WHITE, INPUT);
-	pinMode(PIN_MARRON_WHITE, INPUT);
 
+	pinMode(PIN_GREEN_LED1, OUTPUT);
+	pinMode(PIN_GREEN_LED2, OUTPUT);
+	pinMode(PIN_GREEN_LED3, OUTPUT);
+	pinMode(PIN_GREEN_LED4, OUTPUT);
+
+	pinMode(PIN_MODE_CROISE, INPUT);
+	pinMode(PIN_MODE_DROIT, INPUT);
+
+	// Configuration des sorties des broches du RJ45 Femalle.
 	MaTeteFemelle.SetPinsRJ45(PinsValues);
 	MaTeteFemelle.InitialisationRJ45F();
 
 	// Configuration de la broche de décision.
-	pinMode(PinSwitchMode, INPUT);
 
-	TempPrint.startTimer(3000);
+	Temp.startTimer(4000);
 	
 	  /**
      *  @brief initialize the LCD and master IIC
      */ 
     lcd.init();
     // Print a first message to the LCD.
-    if (ledState){
 		lcd.clear();
 		lcd.setRGB(0, 0, 200);
 		lcd.setCursor(0,0);
-		lcd.print("Mode: DROIT");
+		lcd.print("Mode: NONE");
 		lcd.setCursor(0,1);
-		lcd.print("Checking Cable..");
-	}
-	else{
-		lcd.clear();
-		lcd.setRGB(255, 255, 0);
-		lcd.setCursor(0,0);
-		lcd.print("Mode: CROISE");
-		lcd.setCursor(0,1);
-		lcd.print("Checking Cable..");
-	}
+		lcd.print("Starting..");
+	
+	digitalWrite(PIN_GREEN_LED1, HIGH);
 }
 
 void loop() {
 	// put your main code here, to run repeatedly:
 	
-	int reading = digitalRead(PinSwitchMode);
-	int ModeBlue = digitalRead(PIN_MODE_DROIT);
-	int ModeCroise = digitalRead(PIN_MODE_CROISE);
+	ModeBlue = digitalRead(PIN_MODE_DROIT);
+	ModeCroise = digitalRead(PIN_MODE_CROISE);
 
-	// check to see if you just pressed the button
-	// (i.e. the input went from LOW to HIGH), and you've waited long enough
-	// since the last press to ignore any noise:
 
-	// If the switch changed, due to noise or pressing:
-	if (reading != lastButtonState) {
-	// reset the debouncing timer
-		lastDebounceTime = millis();
-	}
-
-	if ((millis() - lastDebounceTime) > debounceDelay) {
-		// whatever the reading is at, it's been there for longer than the debounce
-		// delay, so take it as the actual current state:
-
-		// if the button state has changed:
-		if (reading != buttonState) {
-			buttonState = reading;
-
-			// only toggle the LED if the new button state is HIGH
-			if (buttonState == HIGH) {
-				ledState = !ledState; // On change de mode de fonctionnement.
-				// On reset toutes les variables pour le statut du mode.
-				ComptChecking = 0;
-				ResetResults();
-				CheckingStatus = true;
-				FinalStatus = false;
-				Finished = false;
-				LastLED = 5;
-				IdLED = 0;
-				// Affichage du mode dans l'écran LCD
-				if (ledState){
-					lcd.clear();
-					lcd.setRGB(0, 0, 200);
-					lcd.setCursor(0,0);
-					lcd.print("Mode: DROIT");
-					lcd.setCursor(0,1);
-					lcd.print("Checking Cable..");
-				}
-				else{
-					lcd.clear();
-					lcd.setRGB(255, 255, 0);
-					lcd.setCursor(0,0);
-					lcd.print("Mode: CROISE");
-					lcd.setCursor(0,1);
-					lcd.print("Checking Cable..");
-				}
-				Temp.startTimer(TimeDelay);  // Temps pour allumer les LED.
-				// TempPrint.startTimer(TimeDelayPrint);// Temps d'attente pour afficher
-									// au moniteur série ou a l'écran LCD.
-			}
-		}
-	}
-
-	if (ledState && CheckingStatus){
+	if (ModeBlue && !ModeCroise){
 		// set the LED:
 		// Nous sommes au mode DROIT.
-
-		IdLED = GetSignalPin();
-		if (IdLED != 20){
-			SelectLED(IdLED);	
-			// Temp.startTimer(TimeDelay);
+		MaTeteFemelle.GetSignal();
+		MaTeteFemelle.GetValues(GotValues);
+		if (Temp.isTimerReady()){
+			Serial.print("\nMODE DROIT\n\n");
+			for (int i = 0; i < 8; i++)
+			{
+				Serial.print("Valeur PIN : ");
+				Serial.print(i+1);
+				Serial.print(" : ");
+				Serial.println(analogRead(PinsValues[i]));
+			}
+			Serial.print("Valeur ModeBlue : ");
+				Serial.println(ModeBlue);
+			Serial.print("Valeur ModeCroise : ");
+				Serial.println(ModeCroise);
+			Temp.startTimer(TimeDelay);
 		}
-		else
-			TurnOffLEDs();
 		
 	}
-	else if (!ledState && CheckingStatus){
+	else if (!ModeBlue && ModeCroise){
 		// Nous sommes au Mode CROISE.
+		MaTeteFemelle.GetSignal();
+		MaTeteFemelle.GetValues(GotValues);
+		if (Temp.isTimerReady()){
+			Serial.print("\nMODE CROISE\n\n");
+			for (int i = 0; i < 8; i++)
+			{
+				Serial.print("Valeur PIN : ");
+				Serial.print(i+1);
+				Serial.print(" : ");
+				Serial.println(analogRead(PinsValues[i]));
+			}
+			Serial.print("Valeur ModeBlue : ");
+				Serial.println(ModeBlue);
+			Serial.print("Valeur ModeCroise : ");
+				Serial.println(ModeCroise);
+			Temp.startTimer(TimeDelay);
+		}
 		
-		IdLED = GetSignalPin();
-		if (IdLED != 20){
-			SelectLED(IdLED);	
-			// Temp.startTimer(TimeDelay);
-		}
-		else{
-			TurnOffLEDs();
-		}
 		
 	}
 	else{
 		// La vérification est terminée... On affiche un message dans le LCD.
 		// On fait maintenant clignoter l'écran LCD, changer la couleur
-		if (FinalStatus == true && GetSignalPin() != 20){
+		if (FinalStatus == true && MaTeteFemelle.TestCable()){
 			if (millis() % 1000 > 500) {
                 lcd.setRGB(0, 0, 200);
 				TurnOnLEDs();
@@ -218,7 +168,7 @@ void loop() {
 				TurnOffLEDs();
             }
 		}
-		else if (FinalStatus == false && GetSignalPin() != 20)
+		else if (FinalStatus == false && MaTeteFemelle.TestCable())
 		{
 			TurnOffLEDs();
 			if (millis() % 500 > 250) {
@@ -228,10 +178,6 @@ void loop() {
             }
 		}
 	}
-
-
-	// save the reading. Next time through the loop, it'll be the lastButtonState:
-	lastButtonState = reading;
 }
 
 short int GetSignalPin(){
@@ -290,7 +236,7 @@ void SelectLED(short int NumLED){
 	}else if (ComptChecking == 4){
 		CheckingStatus = false;
 		Finished = true;
-		FinalStatus = ledState? CableDecisionDroit():CableDecisionCroise();
+		// FinalStatus = ledState? CableDecisionDroit():CableDecisionCroise();
 	}
 	
 	switch (NumLED)

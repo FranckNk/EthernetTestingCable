@@ -3,7 +3,7 @@
 
 RJ45_Female::RJ45_Female(){};
 void RJ45_Female::InitialisationRJ45F(){
-        for (int i = 0; i < sizeof(PinCables)/sizeof(short int); i++)
+        for (int i = 0; i < 8; i++)
         {
             pinMode(PinCables[i], INPUT);
         }
@@ -28,3 +28,18 @@ bool RJ45_Female::GetSignal(){
         }
         return true;
     }
+bool RJ45_Female::TestCable(){
+        for (int i = 0; i < 8; i++)
+        {
+            if (analogRead(PinCables[i]) != 4095 && analogRead(PinCables[i]) != 0)
+                return false;
+        }
+        return true;
+    }
+void RJ45_Female::GetValues(short int Tab[]){
+    for (int i = 0; i < 8; i++)
+    {
+        Tab[i] = digitalRead(PinCables[i]);
+    }
+    
+}

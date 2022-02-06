@@ -13,10 +13,12 @@ VERSION        : 0.0.1
 // Librairies.
 #include <Arduino.h>
 #include "Timer.h"
+#include "Functions.h"
 
 // Declaration d'une instance de la classe Timer.
 Timer Temp;
 Timer TempPrint;
+RJ45_Female MaTeteFemelle;
 
 // Déclaration des constantes.
 // Les LEDs.
@@ -37,6 +39,9 @@ const short int PIN_GREEN_WHITE  = 3;
 const short int PIN_ORANGE_WHITE = 1;
 const short int PIN_MARRON_WHITE = 7;
 
+// Declaration du tableau de toutes les pins du RJ45_Female
+short int PinsValues[8] = {PIN_ORANGE_WHITE, PIN_ORANGE, PIN_GREEN_WHITE, PIN_BLUE, 
+							PIN_BLUE_WHITE, PIN_GREEN, PIN_MARRON_WHITE, PIN_MARRON};
 
 // Déclaration des variables.
 // Variables will change:
@@ -47,7 +52,6 @@ unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 short int PinSwitchMode   	 = 0;
-short int IdLED = 0;
 unsigned long TimeDelayLED 	 = 2000;
 unsigned long TimeDelayPrint = 2000;
 unsigned long TimeDelayTemp  = 0;
@@ -62,22 +66,15 @@ void setup() {
 	Serial.begin(9600);
 
 	// Configuration des sorties des broches du RJ45 Femalle.
-	pinMode(PIN_BLUE, INPUT);
-	pinMode(PIN_GREEN, INPUT);
-	pinMode(PIN_ORANGE, INPUT);
-	pinMode(PIN_MARRON, INPUT);
-	pinMode(PIN_BLUE_WHITE, INPUT);
-	pinMode(PIN_GREEN_WHITE, INPUT);
-	pinMode(PIN_ORANGE_WHITE, INPUT);
-	pinMode(PIN_MARRON_WHITE, INPUT);
+	MaTeteFemelle.SetPinsRJ45(PinsValues);
+	MaTeteFemelle.InitialisationRJ45F();
 
 	// Configuration de la broche de décision.
 	pinMode(PinSwitchMode, INPUT);
 
-	analogWrite(PIN_BLUE, 225);
-	analogWrite(PIN_BLUE_WHITE, 225);
-	analogWrite(PIN_MARRON, 225);
-	analogWrite(PIN_MARRON_WHITE, 225);
+	pinMode(PIN_MODE_CROISE, OUTPUT);
+	pinMode(PIN_MODE_DROIT, OUTPUT);
+
 }
 
 void loop() {
@@ -105,12 +102,13 @@ void loop() {
 			// only toggle the LED if the new button state is HIGH
 			if (buttonState == HIGH) {
 				ledState = !ledState;
+				MaTeteFemelle.SendSignal();
 				LEDModeON(); // On change de mode sur la LED.
 				Temp.startTimer(TimeDelayLED);
 			}
 		}
 	}
-
+	
 	// save the reading. Next time through the loop, it'll be the lastButtonState:
 	lastButtonState = reading;
 }
