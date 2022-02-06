@@ -13,7 +13,6 @@ VERSION        : 0.0.1
 // Librairies.
 #include <Arduino.h>
 #include "Timer.h"
-#include "Functions.h"
 
 // Declaration d'une instance de la classe Timer.
 Timer Temp;

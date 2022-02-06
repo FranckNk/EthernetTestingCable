@@ -15,6 +15,7 @@ VERSION        : 0.0.1
 #include <Arduino.h>
 #include "DFRobot_RGBLCD1602.h"
 #include "Timer.h"
+#include "Functions.h"
 
 // Déclaration de la classe LCD pour notre afficheur.
 DFRobot_RGBLCD1602 lcd(/*lcdCols*/16,/*lcdRows*/2);  //16 characters and 2 lines of show 
