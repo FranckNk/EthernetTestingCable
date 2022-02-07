@@ -8,10 +8,10 @@ private:
     /* data */
     short int PinCables[8];
     short int SignalGot[8];
-    unsigned char ValeurFinale = ((unsigned char) 0x00);
-    unsigned char ValCableDroit = ((unsigned char) 0x73);
-    unsigned char ValCableCroise = ((unsigned char) 0x97);
-    unsigned char ValCableCroiseInverse = ((unsigned char) 0x6E);
+    u_int8_t ValeurFinale = 0x00;
+    u_int8_t ValCableDroit = 0x73;
+    u_int8_t ValCableCroise = 0x97;
+    u_int8_t ValCableCroiseInverse = 0x6E;
 public:
     RJ45_Female();
 
@@ -21,6 +21,8 @@ public:
     void SetPinsRJ45(short int PINS[]);
 
     void SendSignal();
+
+    
 };
 
  

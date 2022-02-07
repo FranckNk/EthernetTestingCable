@@ -16,30 +16,53 @@ void RJ45_Female::SetPinsRJ45(short int PINS[]){
         }
     }
 bool RJ45_Female::GetSignal(){
-        for (int i = 0; i < 8; i++)
+        ValeurFinale = 0x00;
+        uint8_t temp;
+        // Le premier bit du processeur est le bit de poid le plus faible. 
+        // La boule commence par le bit de poids le plus fort.
+        // On doit alors decrementer dans le
+        for (int i = 7; i >= 0; i--)
         {
-            if (analogRead(PinCables[i]) == 4095)
+            temp = pow(2, i);
+            if (analogRead(PinCables[i]) == 4095){
                 SignalGot[i] = 1;
-            else if (analogRead(PinCables[i]) == 0)
+                ValeurFinale = (ValeurFinale | temp);
+            }
+            else if (analogRead(PinCables[i]) == 0){
                 SignalGot[i] = 0;
-            // else
-            //     return ; // le cable n'est pas branche ou il y'a un fil qui ne
-            //     /// fonctionne pas correctement.
+                ValeurFinale = ValeurFinale & (~(temp));
+            }
+            else
+                return false; // le cable n'est pas branche ou il y'a un fil qui ne
+                /// fonctionne pas correctement.
         }
         return true;
     }
-bool RJ45_Female::TestCable(){
-        for (int i = 0; i < 8; i++)
+
+void RJ45_Female::SetBitHigh(int Pos){
+        uint8_t temp = pow(2, Pos);
+        ValeurFinale = (ValeurFinale ^ temp);
+    }
+
+void RJ45_Female::SetBitLow(int Pos){
+        uint8_t temp = pow(2, Pos);
+        ValeurFinale = ValeurFinale ^ (~(temp));
+    }
+
+bool RJ45_Female::CheckCableDroit(){
+        // On se rassure qu'on verifie lorsque le cable est correct.
+        if (ValeurFinale == ValCableDroit)
         {
-            if (analogRead(PinCables[i]) != 4095 && analogRead(PinCables[i]) != 0)
-                return false;
+            return true;
         }
-        return true;
+        else return false;
     }
-void RJ45_Female::GetValues(short int Tab[]){
-    for (int i = 0; i < 8; i++)
-    {
-        Tab[i] = digitalRead(PinCables[i]);
+bool RJ45_Female::CheckCableCroise(){
+        // On se rassure qu'on verifie lorsque le cable est correct.
+        if (ValeurFinale == ValCableCroise || ValeurFinale == ValCableCroiseInverse)
+        {
+            return true;
+        }
+        else return false;
     }
-    
-}
+

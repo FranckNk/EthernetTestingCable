@@ -6,7 +6,7 @@ DATE           : 28/01/2022
 DESCRIPTION    : Programme pour tester deux cables RJ45, ce uC sera considéré comme éméteur du 
 				 signal.
 				 Inspiration du code BuitinExample de Arduino pour le rebondissement. Source : https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce
-VERSION        : 0.0.1
+VERSION        : 0.0.2
 
 */
 
@@ -52,9 +52,6 @@ unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 short int PinSwitchMode   	 = 0;
-unsigned long TimeDelayLED 	 = 2000;
-unsigned long TimeDelayPrint = 2000;
-unsigned long TimeDelayTemp  = 0;
 
 // Declaration des fonctions.
 void ActiveCableEthernet(short int PinBroche);
@@ -104,7 +101,6 @@ void loop() {
 				ledState = !ledState;
 				MaTeteFemelle.SendSignal();
 				LEDModeON(); // On change de mode sur la LED.
-				Temp.startTimer(TimeDelayLED);
 			}
 		}
 	}

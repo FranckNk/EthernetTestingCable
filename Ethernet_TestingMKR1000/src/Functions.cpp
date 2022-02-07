@@ -15,12 +15,19 @@ void RJ45_Female::SetPinsRJ45(short int PINS[]){
            PinCables[i] = PINS[i];
         }
     }
+
+/**
+ * @brief Fonction qui envoi le signal suivant la representation :
+ *      0 1 1 1 0 0 0 1 1
+ * 
+ */
 void RJ45_Female::SendSignal(){
-        for (int i = 0; i < 8; i++)
-        {
-            analogWrite(PinCables[i], 255);
-            // else
-            //     return ; // le cable n'est pas branche ou il y'a un fil qui ne
-            //     /// fonctionne pas correctement.
-        }
-    }
+        analogWrite(PinCables[0], 0);
+        analogWrite(PinCables[1], 255);
+        analogWrite(PinCables[2], 255);
+        analogWrite(PinCables[3], 255);
+        analogWrite(PinCables[4], 0);
+        analogWrite(PinCables[5], 0);
+        analogWrite(PinCables[6], 255);
+        analogWrite(PinCables[7], 255);
+}

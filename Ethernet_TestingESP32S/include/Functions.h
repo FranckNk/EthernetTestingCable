@@ -8,10 +8,10 @@ private:
     /* data */
     short int PinCables[8];
     short int SignalGot[8];
-    unsigned char ValeurFinale = ((unsigned char) 0x00);
-    unsigned char ValCableDroit = ((unsigned char) 0x73);
-    unsigned char ValCableCroise = ((unsigned char) 0x97);
-    unsigned char ValCableCroiseInverse = ((unsigned char) 0x6E);
+    uint8_t ValeurFinale = 0x00;
+    uint8_t ValCableDroit = 0xCE;
+    uint8_t ValCableCroise = 0x97;
+    uint8_t ValCableCroiseInverse = 0x6E;
 public:
     RJ45_Female();
 
@@ -24,7 +24,21 @@ public:
 
     bool TestCable();
 
-    void GetValues(short int Tab[]);
+    void SetBitHigh(int Pos);
+
+    void SetBitLow(int Pos);
+
+    bool CheckCableDroit();
+
+    bool CheckCableCroise();
+
+    uint8_t GetValueFinal(){
+        return ValeurFinale;
+    }
+    short int* GetSignalGot(){
+        return SignalGot;
+    }
+
 };
 
  
