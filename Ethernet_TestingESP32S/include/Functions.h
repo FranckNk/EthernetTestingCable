@@ -24,17 +24,14 @@ public:
 
     bool TestCable();
 
-    void SetBitHigh(int Pos);
-
-    void SetBitLow(int Pos);
-
     bool CheckCableDroit();
 
     bool CheckCableCroise();
-
+    // Juste pour savoir quelle valeur le processeur a recu et son ordre de lecture.
     uint8_t GetValueFinal(){
         return ValeurFinale;
     }
+    // Juste pour tester le signal recu et le signal compris par le processeur.
     short int* GetSignalGot(){
         return SignalGot;
     }

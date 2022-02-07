@@ -39,16 +39,6 @@ bool RJ45_Female::GetSignal(){
         return true;
     }
 
-void RJ45_Female::SetBitHigh(int Pos){
-        uint8_t temp = pow(2, Pos);
-        ValeurFinale = (ValeurFinale ^ temp);
-    }
-
-void RJ45_Female::SetBitLow(int Pos){
-        uint8_t temp = pow(2, Pos);
-        ValeurFinale = ValeurFinale ^ (~(temp));
-    }
-
 bool RJ45_Female::CheckCableDroit(){
         // On se rassure qu'on verifie lorsque le cable est correct.
         if (ValeurFinale == ValCableDroit)

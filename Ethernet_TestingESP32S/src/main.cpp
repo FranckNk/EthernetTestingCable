@@ -26,7 +26,6 @@ DFRobot_RGBLCD1602 lcd(/*lcdCols*/16,/*lcdRows*/2);  //16 characters and 2 lines
 
 // Declaration d'une instance de la classe Timer.
 Timer Temp;
-Timer TempPrint;
 RJ45_Female MaTeteFemelle;
 
 // Déclaration des constantes.
@@ -52,19 +51,11 @@ const short int PIN_MARRON_WHITE = 12;
 // Declaration du tableau de toutes les pins du RJ45_Female
 short int PinsValues[8] = {PIN_ORANGE_WHITE, PIN_ORANGE, PIN_GREEN_WHITE, PIN_BLUE, 
 							PIN_BLUE_WHITE, PIN_GREEN, PIN_MARRON_WHITE, PIN_MARRON};
-short int GotValues[8] = {0};
 
 // Déclaration des variables.
-// Variables will change:
-bool FinalStatus = false;
-bool CheckingStatus = true;
-bool Finished = false;
-short int ComptChecking = 0;
-short int LastLED = 5;
 short int ModeCroise;
 short int ModeDroit;
 
-short int StateResult[4] = {0};
 unsigned long TimeDelay 	= 3000;
 unsigned long TimeDelayPrint 	= 2000;
 
