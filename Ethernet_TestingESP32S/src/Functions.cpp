@@ -15,6 +15,7 @@ void RJ45_Female::SetPinsRJ45(short int PINS[]){
            PinCables[i] = PINS[i];
         }
     }
+
 bool RJ45_Female::GetSignal(){
         ValeurFinale = 0x00;
         uint8_t temp;
@@ -25,11 +26,9 @@ bool RJ45_Female::GetSignal(){
         {
             temp = pow(2, i);
             if (analogRead(PinCables[i]) == 4095){
-                SignalGot[i] = 1;
                 ValeurFinale = (ValeurFinale | temp);
             }
             else if (analogRead(PinCables[i]) == 0){
-                SignalGot[i] = 0;
                 ValeurFinale = ValeurFinale & (~(temp));
             }
             else

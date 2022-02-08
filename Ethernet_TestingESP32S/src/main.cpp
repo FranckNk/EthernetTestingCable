@@ -112,12 +112,12 @@ void loop() {
 				Serial.print("\nMODE DROIT INCORRECT.......\n");
 			}
 			Serial.println(MaTeteFemelle.GetValueFinal());
-			short int* Tab;
-			Tab = MaTeteFemelle.GetSignalGot();
-			for (int i = 0; i < 8; i++)
-			{
-				Serial.print(Tab[i]);
-			}
+			// short int* Tab;
+			// Tab = MaTeteFemelle.GetSignalGot();
+			// for (int i = 0; i < 8; i++)
+			// {
+			// 	Serial.print(Tab[i]);
+			// }
 			Serial.print("\nMODE DROIT\n\n");
 			for (int i = 0; i < 8; i++)
 			{
@@ -144,12 +144,12 @@ void loop() {
 				Serial.print("\nMODE CROISE INCORRECT.......\n");
 			}
 			Serial.println(MaTeteFemelle.GetValueFinal());
-			short int* Tab;
-			Tab = MaTeteFemelle.GetSignalGot();
-			for (int i = 0; i < 8; i++)
-			{
-				Serial.print(Tab[i]);
-			}
+			// short int* Tab;
+			// Tab = MaTeteFemelle.GetSignalGot();
+			// for (int i = 0; i < 8; i++)
+			// {
+			// 	Serial.print(Tab[i]);
+			// }
 			
 			Serial.print("\nMODE CROISE\n\n");
 			for (int i = 0; i < 8; i++)

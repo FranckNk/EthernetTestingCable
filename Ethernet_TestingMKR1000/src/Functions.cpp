@@ -30,4 +30,12 @@ void RJ45_Female::SendSignal(){
         analogWrite(PinCables[5], 0);
         analogWrite(PinCables[6], 255);
         analogWrite(PinCables[7], 255);
+
+        // uint8_t Temp;
+        // for (int i = 0; i < 8; i++)
+        // {
+        //     Temp = pow(2, i);
+        //     if
+        // }
+        
 }
